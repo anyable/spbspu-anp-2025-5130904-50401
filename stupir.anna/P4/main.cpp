@@ -12,7 +12,7 @@ namespace stupir
     }
   }
 
-  char * giveMemory(char * mem_old, size_t & max_mem_now)
+  char * give_memory(char * mem_old, size_t & max_mem_now)
   {
     size_t old_max_mem = max_mem_now;
     max_mem_now *= 2;
@@ -32,7 +32,7 @@ namespace stupir
     return nullptr;
   }
 
-  char * getLine(std::istream & input, size_t & size)
+  char * get_line(std::istream & input, size_t & size)
   {
     bool is_skipws = input.flags() & std::ios_base::skipws;
     if (is_skipws)
@@ -68,7 +68,7 @@ namespace stupir
     {
       if (lenght > max_mem_now - 1)
       {
-        char * mem_extend = giveMemory(mem, max_mem_now);
+        char * mem_extend = give_memory(mem, max_mem_now);
         if (mem_extend == nullptr)
         {
           return nullptr;
@@ -93,7 +93,7 @@ namespace stupir
     return mem;
   }
 
-  size_t compareUnic(const char * line1, const char * line2, size_t len1, size_t len2)
+  size_t compare_unic(const char * line1, const char * line2, size_t len1, size_t len2)
   {
     if (len1 > len2)
     {
@@ -126,7 +126,7 @@ namespace stupir
     return 0;
   }
 
-  size_t countNum(const char * line, size_t len)
+  size_t count_num(const char * line, size_t len)
   {
     size_t result = 0;
     for (size_t i = 0; i < len; ++i)
@@ -136,7 +136,7 @@ namespace stupir
     return result;
   }
 
-  char * addNum(char * start, const char * line1, size_t len1, const char * line2, size_t len2, size_t len_start)
+  char * add_num(char * start, const char * line1, size_t len1, const char * line2, size_t len2, size_t len_start)
   {
     copy(line1, len1, start);
     size_t j = 0;
@@ -161,7 +161,7 @@ int main()
   namespace stu = stupir;
   char * mem = nullptr;
   size_t size = 0;
-  mem = stu::getLine(std::cin, size);
+  mem = stu::get_line(std::cin, size);
   if (size == 0)
   {
     std::cerr << '\n' << "Invalid string\n";
@@ -175,18 +175,18 @@ int main()
   size_t task1 = 0;
   const char * line1 = "abs";
   size_t size_line1 = 3;
-  task1 = stu::compareUnic(mem, line1, size, size_line1);
+  task1 = stu::compare_unic(mem, line1, size, size_line1);
 
   const char * line2 = "g1h2k";
   size_t size_line2 = 5;
-  size_t countNumLine2 = stu::countNum(line2, size_line2);
-  if (countNumLine2 == 0)
+  size_t count_num_line2 = stu::count_num(line2, size_line2);
+  if (count_num_line2 == 0)
   {
     std::cout << task1 << '\n' << mem << '\n';
     free(mem);
     return 0;
   }
-  size_t len_new_line = size + countNumLine2 + 1;
+  size_t len_new_line = size + count_num_line2 + 1;
   char * buffer = reinterpret_cast< char * >(malloc(sizeof(char) * len_new_line));
   if (buffer == nullptr)
   {
@@ -194,7 +194,7 @@ int main()
     std::cerr << "Failed to place a new line in dynamic memory\n";
     return 1;
   }
-  char * task2 = stu::addNum(buffer, mem, size, line2, size_line2, len_new_line);
+  char * task2 = stu::add_num(buffer, mem, size, line2, size_line2, len_new_line);
   std::cout << task1 << '\n';
   std::cout << task2 << '\n';
   free(mem);
