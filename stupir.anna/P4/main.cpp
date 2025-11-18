@@ -75,7 +75,7 @@ namespace stupir
       free(mem);
       return nullptr;
     }
-    mem[lenght] = '\0'; 
+    mem[lenght] = '\0';
     size = lenght;
     if (is_skipws)
     {
@@ -116,6 +116,39 @@ namespace stupir
     }
     return 0;
   }
+
+  size_t countNum(const char * line, size_t len)
+  {
+    size_t result = 0;
+    for (size_t i = 0; i < len; ++i)
+    {
+      result += std::isdigit(line[i]);
+    }
+    return result;
+  }
+
+  char * addNum(char * start, const char * line1, size_t len1, const char * line2, size_t len2)
+  {
+    for (size_t i = 0; i < len1; ++i)
+    {
+      start[i] = line1[i];
+    }
+    size_t j = 0;
+    for (size_t i = len1; i < len1 + len2; ++i)
+    {
+      for (; j < len2; ++j)
+      {
+        if (std::isdigit(line2[j]))
+        {
+          start[i] = line2[j];
+          j++;
+          break;
+        }
+      }
+    }
+    start[len1 + len2] = '\0';
+    return start;
+  }
 }
 
 
@@ -136,12 +169,30 @@ int main()
     return 1;
   }
   size_t task1 = 0;
-  const char * line_compare = "abs";
-  size_t size_line_compare = 3;
-  task1 = stu::compareUnic(mem, line_compare, size, size_line_compare);
+  const char * line1 = "abs";
+  size_t size_line1 = 3;
+  task1 = stu::compareUnic(mem, line1, size, size_line1);
 
-  
+  const char * line2 = "g1h2k";
+  size_t size_line2 = 5;
+  size_t countNumLine2 = stu::countNum(line2, size_line2);
+  if (countNumLine2 == 0)
+  {
+    std::cout << task1 << '\n' << mem << '\n';
+    free(mem);
+    return 0;
+  }
+  size_t len_new_line = size + countNumLine2 + 1;
+  char * buffer = reinterpret_cast< char * >(malloc(sizeof(char) * len_new_line));
+  if (buffer == nullptr)
+  {
+    free(mem);
+    std::cerr << "Failed to place a new line in dynamic memory\n";
+    return 1;
+  }
+  char * task2 = stu::addNum(buffer, mem, size, line2, size_line2);
+  std::cout << '\n' << task1 << '\n';
+  std::cout << task2 << '\n';
   free(mem);
-  std::cout << task1 << '\n';
+  free(task2);
 }
- 
