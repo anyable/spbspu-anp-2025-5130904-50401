@@ -4,6 +4,13 @@
 #include <iomanip> 
 namespace stupir
 {
+  void copy(const char * mem_old, size_t old, char * mem_new)
+  {
+    for (size_t i = 0; i < old; ++i)
+    {
+      mem_new[i] = mem_old[i];
+    }
+  }
   char * giveMemory(char * mem_old, size_t & max_mem_now)
   {
     size_t old_max_mem = max_mem_now;
@@ -11,9 +18,11 @@ namespace stupir
     char * mem_new = nullptr;
     while (max_mem_now > old_max_mem)
     {
-      mem_new = reinterpret_cast< char * >(realloc(mem_old, max_mem_now));
+      mem_new = reinterpret_cast< char * >(malloc(sizeof(char) * max_mem_now));
       if (mem_new != nullptr)
       {
+        copy(mem_old, old_max_mem, mem_new);
+        free(mem_old);
         return mem_new;
       }
       max_mem_now--;
@@ -61,7 +70,6 @@ namespace stupir
         char * mem_extend = giveMemory(mem, max_mem_now);
         if (mem_extend == nullptr)
         {
-          free(mem);
           return nullptr;
         }
         mem = mem_extend;
