@@ -14,12 +14,12 @@ namespace stupir
       mem_new = reinterpret_cast< char * >(realloc(mem_old, max_mem_now));
       if (mem_new != nullptr)
       {
-        mem_old = mem_new;
-        break;
+        return mem_new;
       }
       max_mem_now--;
     }
-    return mem_old;
+    free(mem_old);
+    return nullptr;
   }
 
   char * getLine(std::istream & input, size_t & size)
@@ -31,7 +31,7 @@ namespace stupir
     }
     char a = '\0';
     input >> a;
-    if (!input)
+    if (!input || a == '\n')
     {
       size = 0;
       return nullptr;
@@ -54,7 +54,7 @@ namespace stupir
       return nullptr;
     }
     mem[0] = a;
-    while (input >> a)
+    while (input >> a && a != '\n')
     {
       if (lenght > max_mem_now - 1)
       {
@@ -69,7 +69,7 @@ namespace stupir
       mem[lenght] = a;
       lenght++;
     }
-    if (!input.eof())
+    if (!input)
     {
       size = 0;
       free(mem);
@@ -150,8 +150,6 @@ namespace stupir
     return start;
   }
 }
-
-
 int main()
 {
   namespace stu = stupir;
@@ -160,7 +158,7 @@ int main()
   mem = stu::getLine(std::cin, size);
   if (size == 0)
   {
-    std::cerr << "Invalid string\n";
+    std::cerr << '\n' << "Invalid string\n";
     return 2;
   }
   if (mem == nullptr)
@@ -191,7 +189,7 @@ int main()
     return 1;
   }
   char * task2 = stu::addNum(buffer, mem, size, line2, size_line2);
-  std::cout << '\n' << task1 << '\n';
+  std::cout << task1 << '\n';
   std::cout << task2 << '\n';
   free(mem);
   free(task2);
