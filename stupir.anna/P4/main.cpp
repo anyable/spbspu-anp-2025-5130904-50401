@@ -11,6 +11,7 @@ namespace stupir
       mem_new[i] = mem_old[i];
     }
   }
+
   char * giveMemory(char * mem_old, size_t & max_mem_now)
   {
     size_t old_max_mem = max_mem_now;
@@ -135,14 +136,11 @@ namespace stupir
     return result;
   }
 
-  char * addNum(char * start, const char * line1, size_t len1, const char * line2, size_t len2)
+  char * addNum(char * start, const char * line1, size_t len1, const char * line2, size_t len2, size_t len_start)
   {
-    for (size_t i = 0; i < len1; ++i)
-    {
-      start[i] = line1[i];
-    }
+    copy(line1, len1, start);
     size_t j = 0;
-    for (size_t i = len1; i < len1 + len2; ++i)
+    for (size_t i = len1; i < len_start; ++i)
     {
       for (; j < len2; ++j)
       {
@@ -196,7 +194,7 @@ int main()
     std::cerr << "Failed to place a new line in dynamic memory\n";
     return 1;
   }
-  char * task2 = stu::addNum(buffer, mem, size, line2, size_line2);
+  char * task2 = stu::addNum(buffer, mem, size, line2, size_line2, len_new_line);
   std::cout << task1 << '\n';
   std::cout << task2 << '\n';
   free(mem);
