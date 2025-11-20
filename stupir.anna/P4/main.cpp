@@ -173,13 +173,24 @@ int main()
     return 1;
   }
   size_t task1 = 0;
-  const char * line1 = "abs";
-  size_t size_line1 = 3;
+  const char * line1 = nullptr;
+  size_t size_line1 = 0;
+  line1 = stu::get_line(std::cin, size_line1);
+  if (size_line1 == 0)
+  {
+    free(mem);
+    std::cerr << '\n' << "Invalid string\n";
+    return 2;
+  }
+  if (line1 == nullptr)
+  {
+    free(mem);
+    std::cerr << "Failed to allocate memory for a row\n";
+    return 1;
+  }
   task1 = stu::compare_unic(mem, line1, size, size_line1);
 
-  const char * line2 = "g1h2k";
-  size_t size_line2 = 5;
-  size_t count_num_line2 = stu::count_num(line2, size_line2);
+  size_t count_num_line2 = stu::count_num(line1, size_line1);
   if (count_num_line2 == 0)
   {
     std::cout << task1 << '\n' << mem << '\n';
@@ -194,7 +205,7 @@ int main()
     std::cerr << "Failed to place a new line in dynamic memory\n";
     return 1;
   }
-  char * task2 = stu::add_num(buffer, mem, size, line2, size_line2, len_new_line);
+  char * task2 = stu::add_num(buffer, mem, size, line1, size_line1, len_new_line);
   std::cout << task1 << '\n';
   std::cout << task2 << '\n';
   free(mem);
