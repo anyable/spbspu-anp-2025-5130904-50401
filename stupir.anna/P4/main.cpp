@@ -155,6 +155,16 @@ namespace stupir
     start[len1 + len2] = '\0';
     return start;
   }
+
+  char * cut_mem(char * mem, size_t size)
+  {
+    char * new_mem = reinterpret_cast< char * >(realloc(mem, size));
+    if (new_mem)
+    {
+      mem = new_mem;
+    }
+    return mem;
+  }
 }
 int main()
 {
@@ -172,8 +182,9 @@ int main()
     std::cerr << "Failed to allocate memory for a row\n";
     return 1;
   }
+  mem = stu::cut_mem(mem, size);
   size_t task1 = 0;
-  const char * line1 = nullptr;
+  char * line1 = nullptr;
   size_t size_line1 = 0;
   line1 = stu::get_line(std::cin, size_line1);
   if (size_line1 == 0)
@@ -188,6 +199,7 @@ int main()
     std::cerr << "Failed to allocate memory for a row\n";
     return 1;
   }
+  line1 = stu::cut_mem(line1, size_line1);
   task1 = stu::compare_unic(mem, line1, size, size_line1);
 
   size_t count_num_line2 = stu::count_num(line1, size_line1);
