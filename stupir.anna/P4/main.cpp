@@ -140,7 +140,7 @@ namespace stupir
   {
     copy(line1, len1, start);
     size_t j = 0;
-    for (size_t i = len1; i < len_start; ++i)
+    for (size_t i = len1; i < len_start - 1; ++i)
     {
       for (; j < len2; ++j)
       {
@@ -152,7 +152,7 @@ namespace stupir
         }
       }
     }
-    start[len1 + len2] = '\0';
+    start[len_start - 1] = '\0';
     return start;
   }
 
@@ -182,7 +182,7 @@ int main()
     std::cerr << "Failed to allocate memory for a row\n";
     return 1;
   }
-  mem = stu::cut_mem(mem, size);
+  mem = stu::cut_mem(mem, size + 1);
 
   size_t task1 = 0;
   const char * line1 = "abs";
