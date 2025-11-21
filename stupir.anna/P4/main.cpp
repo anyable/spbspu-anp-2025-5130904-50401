@@ -185,7 +185,7 @@ int main()
   mem = stu::cut_mem(mem, size);
 
   size_t task1 = 0;
-  char * line1 = "abs";
+  const char * line1 = "abs";
   size_t size_line1 = 3;
   task1 = stu::compare_unic(mem, line1, size, size_line1);
 
