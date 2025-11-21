@@ -1,7 +1,7 @@
 #include <memory>
 #include <fstream>
 #include <iostream>
-#include <iomanip> 
+#include <iomanip>
 namespace stupir
 {
   void copy(const char * mem_old, size_t old, char * mem_new)
