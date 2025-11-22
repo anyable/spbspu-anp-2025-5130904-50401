@@ -184,17 +184,17 @@ int main()
   }
   mem = stu::cut_mem(mem, size + 1);
 
-  size_t task1 = 0;
+  size_t check_same_char = 0;
   const char * line1 = "abs";
   size_t size_line1 = 3;
-  task1 = stu::compare_unic(mem, line1, size, size_line1);
+  check_same_char = stu::compare_unic(mem, line1, size, size_line1);
 
   const char * line2 = "g1h2k";
   size_t size_line2 = 5;
   size_t count_num_line2 = stu::count_num(line2, size_line2);
   if (count_num_line2 == 0)
   {
-    std::cout << task1 << '\n' << mem << '\n';
+    std::cout << check_same_char << '\n' << mem << '\n';
     free(mem);
     return 0;
   }
@@ -206,9 +206,9 @@ int main()
     std::cerr << "Failed to place a new line in dynamic memory\n";
     return 1;
   }
-  char * task2 = stu::add_num(buffer, mem, size, line2, size_line2, len_new_line);
-  std::cout << task1 << '\n';
-  std::cout << task2 << '\n';
+  char * change_line = stu::add_num(buffer, mem, size, line2, size_line2, len_new_line);
+  std::cout << check_same_char << '\n';
+  std::cout << change_line << '\n';
   free(mem);
-  free(task2);
+  free(change_line);
 }
