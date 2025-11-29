@@ -3,12 +3,6 @@
 
 namespace stupir
 {
-  int * create(size_t rows, size_t cols)
-  {
-    int * arr = new int[rows * cols]();
-    return arr;
-  }
-
   bool checkAddSnail(size_t up, size_t down, size_t left, size_t right)
   {
     return (up <= down && left <= right);
@@ -72,46 +66,21 @@ namespace stupir
     }
   }
 
-  int * create(int * arr, const char * firstArg, size_t rows, size_t cols)
-  {
-    static const size_t maxStat = 10000;
-    static int statMem[maxStat];
-    if (firstArg[0] == '1')
-    {
-      if (rows * cols <= maxStat)
-      {
-        arr = statMem;
-        for (size_t i = 0; i < rows * cols; ++i)
-        {
-          arr[i] = 0;
-        }
-      }
-      else
-      {
-        throw std::bad_alloc();
-      }
-    }
-    else
-    {
-      arr = new int[rows * cols]();
-    }
-    return arr;
-  }
-
-  void readArr(std::ifstream& input, size_t rows, size_t cols, int * arr)
+  std::ifstream & readArr(std::ifstream & input, size_t rows, size_t cols, int * arr)
   {
     for (size_t i = 0; i < rows * cols; ++i)
     {
       input >> arr[i];
     }
+    return input;
   }
 
-  void writeArr(std::ofstream& output, size_t rows, size_t cols, const int * arr)
+  void writeArr(std::ofstream & output, size_t rows, size_t cols, const int * arr)
   {
     if (!output.fail())
     {
       output << arr[0];
-      for (size_t i = 1; i < rows * cols; ++ i)
+      for (size_t i = 1; i < rows * cols; ++i)
       {
         output << " " << arr[i];
       }
@@ -171,6 +140,10 @@ namespace stupir
 }
 int main(int argc, char ** argv)
 {
+  const char * firstArg = argv[1];
+  const char * secondArg = argv[2];
+  const char * thirdArg = argv[3];
+
   if (argc < 4)
   {
     std::cerr << "Not enough argument\n";
@@ -181,20 +154,11 @@ int main(int argc, char ** argv)
     std::cerr << "Too many arguments\n";
     return 1;
   }
-  else if (argv[1][0] < '0' || argv[1][0] > '9')
-  {
-    std::cerr << "First parametr isn't a number\n";
-    return 1;
-  }
-  else if (argv[1][0] != '1' && argv[1][0] != '2')
+  else if ((firstArg[0] != '1' && firstArg[0] != '2') || firstArg[1] != '\0')
   {
     std::cerr << "First parametr out of range\n";
     return 1;
   }
-
-  const char * firstArg = argv[1];
-  const char * secondArg = argv[2];
-  const char * thirdArg = argv[3];
 
   std::ifstream input(secondArg);
   if (!input.is_open())
@@ -213,35 +177,51 @@ int main(int argc, char ** argv)
     return 2;
   }
 
-  int * arr = nullptr;
-  int * task1 = nullptr;
-  size_t task2 = 0;
+  const size_t maxStat = 10000;
+  int * matrixFile = nullptr;
+  int * matrixChange = nullptr;
+  size_t numDigNotNull = 0;
   namespace stu = stupir;
   try
   {
-    arr = stu::create(arr, firstArg, rows, cols);
-    stu::readArr(input, rows, cols, arr);
-    if (input.fail())
+    if (firstArg[0] == '1')
+    {
+      if (rows * cols <= maxStat)
+      {
+        int buffer[maxStat] = {};
+        matrixFile = buffer;
+      }
+      else
+      {
+        throw std::bad_alloc();
+      }
+    }
+    else
+    {
+      matrixFile = new int[rows * cols]();
+    }
+
+    if (!stu::readArr(input, rows, cols, matrixFile))
     {
       std::cerr << "Non-correct values of matrix elements\n";
       if (firstArg[0] == '2')
       {
-        delete [] arr;
+        delete [] matrixFile;
       }
       return 2;
     }
     input.close();
-    task1 = stu::create(rows, cols);
+    matrixChange = new int[rows * cols]();
     if (rows != 0 && cols != 0)
     {
-      stu::addSnail(arr, rows, cols, task1);
+      stu::addSnail(matrixFile, rows, cols, matrixChange);
     }
-    task2 = stu::countNotZeroD(arr, rows, cols);
+    numDigNotNull = stu::countNotZeroD(matrixFile, rows, cols);
   }
-  catch (const std::bad_alloc& e)
+  catch (const std::bad_alloc & e)
   {
-    delete [] arr;
-    delete [] task1;
+    delete [] matrixFile;
+    delete [] matrixChange;
     std::cerr << "Not enough memory\n";
     return 2;
   }
@@ -249,17 +229,17 @@ int main(int argc, char ** argv)
   if (rows != 0 && cols != 0)
   {
     output << rows << " " << cols << " ";
-    stu::writeArr(output, rows, cols, task1);
+    stu::writeArr(output, rows, cols, matrixChange);
   }
   else
   {
     output << rows << " " << cols;
   }
-  output << "\n" << task2;
+  output << "\n" << numDigNotNull;
 
   if (firstArg[0] == '2')
   {
-    delete [] arr;
+    delete [] matrixFile;
   }
-  delete [] task1;
+  delete [] matrixChange;
 }
