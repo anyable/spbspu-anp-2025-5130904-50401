@@ -11,7 +11,7 @@ namespace stupir
   struct Xquare;
   void scalePoint(point_t, double, Shape &);
   std::ostream & operator<<(std::ostream &, const rectangle_t &);
-  rectangle_t getFrameAllFigure(const rectangle_t &, const rectangle_t &, const rectangle_t &);
+  rectangle_t getFrameAll(rectangle_t &, rectangle_t &, rectangle_t &);
 }
 
 struct stupir::point_t
@@ -116,14 +116,14 @@ void stupir::scalePoint(point_t p, double k, Shape & f)
   f.move(begin.x, begin.y);
 }
 
-std::ostream & stupir::operator<<(std::ostream & out, const stupir::rectangle_t & rec)
+std::ostream & stupir::operator<<(std::ostream & out, const rectangle_t & rec)
 {
   out << "hight = " << rec.height << ", weight = " << rec.width << ", pos = {" ;
   out << rec.pos.x << ", " << rec.pos.y << "}\n";
   return out;
 }
 
-stupir::rectangle_t stupir::getFrameAllFigure(const stupir::rectangle_t & f1, const stupir::rectangle_t & f2, const stupir::rectangle_t & f3)
+stupir::rectangle_t stupir::getFrameAll(rectangle_t & f1, rectangle_t & f2, rectangle_t & f3)
 {
   double maxX = std::max(std::max(f1.pos.x, f2.pos.x), f3.pos.x);
   double minX = std::min(std::min(f1.pos.x, f2.pos.x), f3.pos.x);
@@ -131,7 +131,7 @@ stupir::rectangle_t stupir::getFrameAllFigure(const stupir::rectangle_t & f1, co
   double minY = std::min(std::min(f1.pos.y, f2.pos.y), f3.pos.y);
   double newWidht = std::abs(maxX - minX);
   double newHight = std::abs(maxY - minY);
-  stupir::point_t newPos = {maxY + maxX / 2, minX + minY / 2};
+  point_t newPos = {maxY + maxX / 2, minX + minY / 2};
   return {newWidht, newHight, newPos};
 }
 
@@ -174,7 +174,7 @@ int main()
     std::cout << "The bounding rectangle of xquare - " << recXq;
     std::cout << "Summa areas all figure = " << areaRec + areaSq + areaXq << '\n';
     std::cout << "The bounding rectangle of all figure - ";
-    std::cout << stu::getFrameAllFigure(recRec, recSq, recXq);
+    std::cout << stu::getFrameAll(recRec, recSq, recXq);
 
     f[0] -> move({2, -6});
     f[1] -> scale(4.5);
@@ -194,7 +194,7 @@ int main()
     std::cout << "The bounding rectangle of xquare - " << recXqCh;
     std::cout << "Summa areas all figure = " << areaRecCh + areaSqCh + areaXqCh << '\n';
     std::cout << "The bounding rectangle of all figure - ";
-    std::cout << stu::getFrameAllFigure(recRecCh, recSqCh, recXqCh);
+    std::cout << stu::getFrameAll(recRecCh, recSqCh, recXqCh);
   }
   catch(...)
   {
