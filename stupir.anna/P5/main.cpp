@@ -11,7 +11,9 @@ namespace stupir
   struct Xquare;
   void scalePoint(point_t, double, Shape &);
   std::ostream & operator<<(std::ostream &, const rectangle_t &);
-  rectangle_t getFrameAll(rectangle_t &, rectangle_t &, rectangle_t &);
+  rectangle_t getFrameAll(rectangle_t * arr, size_t len);
+  void printParametrFigures(Shape ** f, double * arrAreaFigure, rectangle_t * arrRecFigure,
+    double & sumArea, const size_t numFigure);
 }
 
 struct stupir::point_t
@@ -108,12 +110,11 @@ stupir::rectangle_t stupir::Xquare::getFrameRect() const
 
 void stupir::scalePoint(point_t p, double k, Shape & f)
 {
-  point_t mid = f.getFrameRect().pos;
-  point_t end = {mid.x + p.x, mid.y + p.y};
-  f.move(p.x, p.y);
+  point_t t = f.getFrameRect().pos;
+  point_t change = {p.x - t.x, p.y - t.y};
+  f.move(p);
   f.scale(k);
-  point_t begin = {mid.x * 2 - end.x, mid.y * 2 - end.y};
-  f.move(begin.x, begin.y);
+  f.move(-change.x * 2, -change.y * 2);
 }
 
 std::ostream & stupir::operator<<(std::ostream & out, const rectangle_t & rec)
@@ -123,16 +124,46 @@ std::ostream & stupir::operator<<(std::ostream & out, const rectangle_t & rec)
   return out;
 }
 
-stupir::rectangle_t stupir::getFrameAll(rectangle_t & f1, rectangle_t & f2, rectangle_t & f3)
+stupir::rectangle_t stupir::getFrameAll(rectangle_t * arr, size_t len)
 {
-  double maxX = std::max(std::max(f1.pos.x, f2.pos.x), f3.pos.x);
-  double minX = std::min(std::min(f1.pos.x, f2.pos.x), f3.pos.x);
-  double maxY = std::max(std::max(f1.pos.y, f2.pos.y), f3.pos.y);
-  double minY = std::min(std::min(f1.pos.y, f2.pos.y), f3.pos.y);
-  double newWidht = std::abs(maxX - minX);
-  double newHight = std::abs(maxY - minY);
-  point_t newPos = {maxY + maxX / 2, minX + minY / 2};
-  return {newWidht, newHight, newPos};
+  double maxX = arr[0].pos.x + arr[0].width / 2;
+  double minX = arr[0].pos.x - arr[0].width / 2;
+  double maxY = arr[0].pos.y + arr[0].height / 2;
+  double minY = arr[0].pos.y - arr[0].height / 2;
+
+  for (size_t i = 1; i < len; ++i)
+  {
+    double xMax = arr[i].pos.x + arr[i].width / 2;
+    double xMin = arr[i].pos.x - arr[i].width / 2;
+    double yMax = arr[i].pos.y + arr[i].height / 2;
+    double yMin = arr[i].pos.y - arr[i].height / 2;
+    maxX = (xMax > maxX) ? xMax : maxX;
+    minX = (xMin < minX) ? xMin : minX;
+    maxY = (yMax > maxY) ? yMax : maxY;
+    minY = (yMin < minY) ? yMin : minY;
+  }
+  point_t newPos = {(maxX + minX) / 2, (maxY + minY) / 2};
+  return {maxX - minX, maxY - minY, newPos};
+}
+
+void stupir::printParametrFigures(Shape ** f, double * arrAreaFigure, rectangle_t * arrRecFigure,
+  double & sumArea, const size_t numFigure)
+{
+  for (size_t i = 0; i < numFigure; ++i)
+    {
+      double area = f[i] -> getArea();
+      sumArea += area;
+      arrAreaFigure[i] = f[i] -> getArea();
+      arrRecFigure[i] = f[i] -> getFrameRect();
+    }
+    for (size_t i = 0; i < numFigure; ++i)
+    {
+      std::cout << "Area figure" << i + 1 << " = " << arrAreaFigure[i] << '\n';
+      std::cout << "The bounding rectangle of figure" << i + 1 << " - " << arrRecFigure[i];
+    }
+    std::cout << "Summa areas all figure = " << sumArea << '\n';
+    std::cout << "The bounding rectangle of all figure - ";
+    std::cout << getFrameAll(arrRecFigure, numFigure) << '\n';
 }
 
 int main()
@@ -140,28 +171,19 @@ int main()
   namespace stu = stupir;
   int err = 0;
   stu::Shape ** f = nullptr;
+  stu::rectangle_t * arrRecFigure = nullptr;
+  double * arrAreaFigure = nullptr;
+  size_t numFigure = 3;
   try
   {
-    f = new stu::Shape * [3]{nullptr};
+    f = new stu::Shape * [numFigure]{nullptr};
     f[0] = new stu::Rectangle({0, 0}, 2, 3);
-    f[1] = new stu::Square({3, 5}, 12);
-    f[2] = new stu::Xquare({-1, 4}, 5);
-    double areaRec = f[0] -> getArea();
-    double areaSq = f[1] -> getArea();
-    double areaXq = f[2] -> getArea();
-    stu::rectangle_t recRec = f[0] -> getFrameRect();
-    stu::rectangle_t recSq = f[1] -> getFrameRect();
-    stu::rectangle_t recXq = f[2] -> getFrameRect();
-
-    std::cout << "Area rectangle = " << areaRec << '\n';
-    std::cout << "The bounding rectangle of rectangle - " << recRec;
-    std::cout << "Area square = " << areaSq << '\n';
-    std::cout << "The bounding rectangle of square - " << recSq;
-    std::cout << "Area xquare = " << areaXq << '\n';
-    std::cout << "The bounding rectangle of xquare - " << recXq;
-    std::cout << "Summa areas all figure = " << areaRec + areaSq + areaXq << '\n';
-    std::cout << "The bounding rectangle of all figure - ";
-    std::cout << stu::getFrameAll(recRec, recSq, recXq);
+    f[1] = new stu::Square({3, 5}, 4);
+    f[2] = new stu::Xquare({-1, 4}, 3);
+    arrAreaFigure = new double[numFigure];
+    arrRecFigure = new stu::rectangle_t[numFigure];
+    double sumArea = 0;
+    printParametrFigures(f, arrAreaFigure, arrRecFigure, sumArea, numFigure);
 
     double k = 0;
     stu::point_t scalePoint{0, 0};
@@ -175,25 +197,17 @@ int main()
       throw std::logic_error("\nNot correct coefficient for scale(negative)");
     }
 
-    f[0] -> move({2, -6});
-    f[1] -> scale(4.5);
-    stu::scalePoint({6, -2}, 3.1, *f[2]);
-    double areaRecCh = f[0] -> getArea();
-    double areaSqCh = f[1] -> getArea();
-    double areaXqCh = f[2] -> getArea();
-    stu::rectangle_t recRecCh = f[0] -> getFrameRect();
-    stu::rectangle_t recSqCh = f[1] -> getFrameRect();
-    stu::rectangle_t recXqCh = f[2] -> getFrameRect();
+    f[2] -> move({2, -6});
+    f[0] -> scale(4.5);
+    stu::scalePoint(scalePoint, k, *f[1]);
 
-    std::cout << "Area rectangle = " << areaRecCh << '\n';
-    std::cout << "The bounding rectangle of rectangle - " << recRecCh;
-    std::cout << "Area square = " << areaSqCh << '\n';
-    std::cout << "The bounding rectangle of square - " << recSqCh;
-    std::cout << "Area xquare = " << areaXqCh << '\n';
-    std::cout << "The bounding rectangle of xquare - " << recXqCh;
-    std::cout << "Summa areas all figure = " << areaRecCh + areaSqCh + areaXqCh << '\n';
-    std::cout << "The bounding rectangle of all figure - ";
-    std::cout << stu::getFrameAll(recRecCh, recSqCh, recXqCh);
+    delete [] arrAreaFigure;
+    delete [] arrRecFigure;
+    sumArea = 0;
+    arrAreaFigure = new double[numFigure];
+    arrRecFigure = new stu::rectangle_t[numFigure];
+    std::cout << "\nAfter scale\n";
+    printParametrFigures(f, arrAreaFigure, arrRecFigure, sumArea, numFigure);
   }
   catch (const std::logic_error & e)
   {
@@ -209,6 +223,8 @@ int main()
       return err;
     }
   }
+  delete [] arrAreaFigure;
+  delete [] arrRecFigure;
   delete f[0];
   delete f[1];
   delete f[2];
