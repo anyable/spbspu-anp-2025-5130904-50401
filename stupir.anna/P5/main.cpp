@@ -168,13 +168,11 @@ int main()
     std::cin >> scalePoint.x >> scalePoint.y >> k;
     if (std::cin.fail())
     {
-      std::cerr << "\nNot correct data for scale\n";
-      return 1;
+      throw std::logic_error("\nNot correct data for scale");
     }
     else if (k <= 0)
     {
-      std::cerr << "\nNot correct coefficient for scale(negative)\n";
-      return 1;
+      throw std::logic_error("\nNot correct coefficient for scale(negative)");
     }
 
     f[0] -> move({2, -6});
@@ -197,7 +195,12 @@ int main()
     std::cout << "The bounding rectangle of all figure - ";
     std::cout << stu::getFrameAll(recRecCh, recSqCh, recXqCh);
   }
-  catch(...)
+  catch (const std::logic_error & e)
+  {
+    std::cerr << e.what() << '\n';
+    err = 1;
+  }
+  catch (const std::bad_alloc & e)
   {
     std::cerr << "Could not allocete memory\n";
     err = 1;
