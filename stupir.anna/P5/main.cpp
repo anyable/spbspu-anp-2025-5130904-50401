@@ -4,7 +4,6 @@ namespace stupir
 {
   struct point_t;
   struct rectangle_t;
-  struct seg_t;
   struct Shape;
   struct Rectangle;
   struct Square;
@@ -12,8 +11,8 @@ namespace stupir
   void scalePoint(point_t, double, Shape &);
   std::ostream & operator<<(std::ostream &, const rectangle_t &);
   rectangle_t getFrameAll(rectangle_t * arr, size_t len);
-  void printParametrFigures(Shape ** f, double * arrAreaFigure, rectangle_t * arrRecFigure,
-    double & sumArea, const size_t numFigure);
+  void printFig(double *, rectangle_t *, double &, const size_t);
+  void calcParamFig(Shape **, double *, rectangle_t *, double &, const size_t);
 }
 
 struct stupir::point_t
@@ -42,6 +41,7 @@ struct stupir::Shape
 struct stupir::Rectangle : Shape
 {
   Rectangle(point_t center, double weight, double hight);
+  Rectangle(point_t leftDown, point_t rightUp);
   double getArea() const override;
   rectangle_t getFrameRect() const override;
   void move(point_t) override;
@@ -71,7 +71,12 @@ void stupir::Rectangle::move(point_t p)
 
 stupir::Rectangle::Rectangle(point_t center, double weight, double hight):
   Shape(), c_(center), w_(weight), h_(hight)
-  {}
+  {
+    if (w_ <= 0 || h_ <= 0)
+    {
+      throw std::logic_error("Not  correct size");
+    }
+  }
 
 double stupir::Rectangle::getArea() const
 {
@@ -90,22 +95,76 @@ struct stupir::Square : Rectangle
 
 stupir::Square::Square(point_t center, double len):
   Rectangle(center, len, len)
-  {}
+  {
+    if (len <= 0)
+    {
+      throw std::logic_error("Not correct size Square");
+    }
+  }
 
-struct stupir::Xquare : Square
+struct stupir::Xquare : Shape
 {
-  Xquare(point_t, double);
+  Xquare(point_t pDown, double size);
+  Xquare(point_t leftPoint, point_t rightPoint);
+  double getArea() const override;
   rectangle_t getFrameRect() const override;
+  void move(point_t) override;
+  void move(double x, double y) override;
+  void scale(double) override;
+  double side() const;
+  private:
+    point_t center_;
+    double dig_;
 };
 
+void stupir::Xquare::scale(double k)
+{
+  dig_ *= k;
+}
+
+void stupir::Xquare::move(point_t p)
+{
+  center_ = p;
+}
+
+void stupir::Xquare::move(double x, double y)
+{
+  center_.x += x;
+  center_.y += y;
+}
+
+double stupir::Xquare::side() const
+{
+  return std::sqrt((dig_ / 2) * (dig_ / 2) * 2);
+}
+
 stupir::Xquare::Xquare(point_t center, double len):
-  Square(center, len)
-  {}
+  Shape(), center_(center), dig_(std::sqrt(len * len * 2))
+  {
+    if (len <= 0)
+    {
+      throw std::logic_error("Not correct size for Xquare");
+    }
+  }
+
+stupir::Xquare::Xquare(point_t leftPoint, point_t rightPoint):
+  center_({(leftPoint.x + rightPoint.x) / 2, (leftPoint.y + rightPoint.y) / 2}),
+  dig_(rightPoint.x - leftPoint.x)
+  {
+    if (leftPoint.x >= rightPoint.x || leftPoint.y != rightPoint.y)
+    {
+      throw std::logic_error("Not correct point for diagonal Xquare");
+    }
+  }
+
+double stupir::Xquare::getArea() const
+{
+  return side() * side();
+}
 
 stupir::rectangle_t stupir::Xquare::getFrameRect() const
 {
-  double d = std::sqrt(w_ * w_ + h_ * h_);
-  return {d , d , c_};
+  return {dig_, dig_, center_};
 }
 
 void stupir::scalePoint(point_t p, double k, Shape & f)
@@ -146,16 +205,21 @@ stupir::rectangle_t stupir::getFrameAll(rectangle_t * arr, size_t len)
   return {maxX - minX, maxY - minY, newPos};
 }
 
-void stupir::printParametrFigures(Shape ** f, double * arrAreaFigure, rectangle_t * arrRecFigure,
-  double & sumArea, const size_t numFigure)
+void stupir::calcParamFig(Shape ** f, double * arrAreaFigure, rectangle_t * arrRecFigure,
+   double & sumArea, const size_t numFigure)
 {
   for (size_t i = 0; i < numFigure; ++i)
     {
       double area = f[i] -> getArea();
       sumArea += area;
-      arrAreaFigure[i] = f[i] -> getArea();
+      arrAreaFigure[i] = area;
       arrRecFigure[i] = f[i] -> getFrameRect();
     }
+}
+
+void stupir::printFig(double * arrAreaFigure, rectangle_t * arrRecFigure,
+  double & sumArea, const size_t numFigure)
+{
     for (size_t i = 0; i < numFigure; ++i)
     {
       std::cout << "Area figure" << i + 1 << " = " << arrAreaFigure[i] << '\n';
@@ -166,6 +230,16 @@ void stupir::printParametrFigures(Shape ** f, double * arrAreaFigure, rectangle_
     std::cout << getFrameAll(arrRecFigure, numFigure) << '\n';
 }
 
+stupir::Rectangle::Rectangle(point_t leftDown, point_t rightUp):
+  c_({(rightUp.x + leftDown.x) / 2, (rightUp.y + leftDown.y) / 2}),
+  w_(rightUp.x - leftDown.x), h_(rightUp.y - leftDown.y)
+  {
+    if (leftDown.x >= rightUp.x || leftDown.y >= rightUp.y)
+    {
+      throw std::logic_error("Not correct point for Rectangle");
+    }
+  }
+
 int main()
 {
   namespace stu = stupir;
@@ -173,17 +247,21 @@ int main()
   stu::Shape ** f = nullptr;
   stu::rectangle_t * arrRecFigure = nullptr;
   double * arrAreaFigure = nullptr;
-  size_t numFigure = 3;
+  size_t numFigure = 5;
   try
   {
-    f = new stu::Shape * [numFigure]{nullptr};
+    stu::point_t p = {3.2, 4.5};
+    f = new stu::Shape * [numFigure]();
     f[0] = new stu::Rectangle({0, 0}, 2, 3);
-    f[1] = new stu::Square({3, 5}, 4);
+    f[1] = new stu::Square(p, 3);
     f[2] = new stu::Xquare({-1, 4}, 3);
+    f[3] = new stu::Rectangle({2, 3}, p);
+    f[4] = new stu::Xquare({1, 2}, {16, 2});
     arrAreaFigure = new double[numFigure];
     arrRecFigure = new stu::rectangle_t[numFigure];
     double sumArea = 0;
-    printParametrFigures(f, arrAreaFigure, arrRecFigure, sumArea, numFigure);
+    stu::calcParamFig(f, arrAreaFigure, arrRecFigure, sumArea, numFigure);
+    stu::printFig(arrAreaFigure, arrRecFigure, sumArea, numFigure);
 
     double k = 0;
     stu::point_t scalePoint{0, 0};
@@ -199,7 +277,10 @@ int main()
 
     f[2] -> move({2, -6});
     f[0] -> scale(4.5);
+    f[1] -> move(2.3, 3.7);
+    stu::scalePoint(scalePoint, k, *f[3]);
     stu::scalePoint(scalePoint, k, *f[1]);
+    stu::scalePoint(scalePoint, k, *f[4]);
 
     delete [] arrAreaFigure;
     delete [] arrRecFigure;
@@ -207,7 +288,8 @@ int main()
     arrAreaFigure = new double[numFigure];
     arrRecFigure = new stu::rectangle_t[numFigure];
     std::cout << "\nAfter scale\n";
-    printParametrFigures(f, arrAreaFigure, arrRecFigure, sumArea, numFigure);
+    stu::calcParamFig(f, arrAreaFigure, arrRecFigure, sumArea, numFigure);
+    stu::printFig(arrAreaFigure, arrRecFigure, sumArea, numFigure);
   }
   catch (const std::logic_error & e)
   {
@@ -225,9 +307,10 @@ int main()
   }
   delete [] arrAreaFigure;
   delete [] arrRecFigure;
-  delete f[0];
-  delete f[1];
-  delete f[2];
+  for (size_t i = 0; i < numFigure; ++i)
+  {
+    delete f[i];
+  }
   delete [] f;
   return err;
 }
