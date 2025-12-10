@@ -138,19 +138,6 @@ stupir::rectangle_t stupir::getFrameAll(rectangle_t & f1, rectangle_t & f2, rect
 int main()
 {
   namespace stu = stupir;
-  double k = 0;
-  stu::point_t scalePoint{0, 0};
-  std::cin >> scalePoint.x >> scalePoint.y >> k;
-  if (std::cin.fail())
-  {
-    std::cerr << "\nNot correct data for scale\n";
-    return 1;
-  }
-  else if (k <= 0)
-  {
-    std::cerr << "\nNot correct coefficient for scale(negative)\n";
-    return 1;
-  }
   int err = 0;
   stu::Shape ** f = nullptr;
   try
@@ -175,6 +162,20 @@ int main()
     std::cout << "Summa areas all figure = " << areaRec + areaSq + areaXq << '\n';
     std::cout << "The bounding rectangle of all figure - ";
     std::cout << stu::getFrameAll(recRec, recSq, recXq);
+
+    double k = 0;
+    stu::point_t scalePoint{0, 0};
+    std::cin >> scalePoint.x >> scalePoint.y >> k;
+    if (std::cin.fail())
+    {
+      std::cerr << "\nNot correct data for scale\n";
+      return 1;
+    }
+    else if (k <= 0)
+    {
+      std::cerr << "\nNot correct coefficient for scale(negative)\n";
+      return 1;
+    }
 
     f[0] -> move({2, -6});
     f[1] -> scale(4.5);
