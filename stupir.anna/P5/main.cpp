@@ -8,9 +8,9 @@ namespace stupir
   struct Rectangle;
   struct Square;
   struct Xquare;
-  void scalePoint(point_t, double, Shape &);
   std::ostream & operator<<(std::ostream &, const rectangle_t &);
-  rectangle_t getFrameAll(rectangle_t * arr, size_t len);
+  void scalePoint(point_t, double, Shape &);
+  rectangle_t getFrameAll(rectangle_t *, size_t);
   void printFig(double *, rectangle_t *, double &, const size_t);
   void calcParamFig(Shape **, double *, rectangle_t *, double &, const size_t);
 }
@@ -30,15 +30,15 @@ struct stupir::rectangle_t
 
 struct stupir::Shape
 {
+  virtual ~Shape() = default;
   virtual double getArea() const = 0;
   virtual rectangle_t getFrameRect() const = 0;
   virtual void move(point_t) = 0;
   virtual void move(double , double) = 0;
   virtual void scale(double) = 0;
-  virtual ~Shape() = default;
 };
 
-struct stupir::Rectangle : Shape
+struct stupir::Rectangle: Shape
 {
   Rectangle(point_t center, double weight, double hight);
   Rectangle(point_t leftDown, point_t rightUp);
@@ -47,7 +47,7 @@ struct stupir::Rectangle : Shape
   void move(point_t) override;
   void move(double x, double y) override;
   void scale(double k) override;
-  protected:
+  private:
     point_t c_;
     double w_;
     double h_;
@@ -70,7 +70,10 @@ void stupir::Rectangle::move(point_t p)
 }
 
 stupir::Rectangle::Rectangle(point_t center, double weight, double hight):
-  Shape(), c_(center), w_(weight), h_(hight)
+  Shape(),
+  c_(center),
+  w_(weight),
+  h_(hight)
   {
     if (w_ <= 0 || h_ <= 0)
     {
@@ -88,9 +91,9 @@ stupir::rectangle_t stupir::Rectangle::getFrameRect() const
   return {w_, h_, c_};
 }
 
-struct stupir::Square : Rectangle
+struct stupir::Square: Rectangle
 {
-  Square(point_t , double);
+  Square(point_t, double);
 };
 
 stupir::Square::Square(point_t center, double len):
@@ -102,7 +105,7 @@ stupir::Square::Square(point_t center, double len):
     }
   }
 
-struct stupir::Xquare : Shape
+struct stupir::Xquare: Shape
 {
   Xquare(point_t pDown, double size);
   Xquare(point_t leftPoint, point_t rightPoint);
@@ -139,7 +142,9 @@ double stupir::Xquare::side() const
 }
 
 stupir::Xquare::Xquare(point_t center, double len):
-  Shape(), center_(center), dig_(std::sqrt(len * len * 2))
+  Shape(),
+  center_(center),
+  dig_(std::sqrt(len * len * 2))
   {
     if (len <= 0)
     {
@@ -206,14 +211,14 @@ stupir::rectangle_t stupir::getFrameAll(rectangle_t * arr, size_t len)
 }
 
 void stupir::calcParamFig(Shape ** f, double * arrAreaFigure, rectangle_t * arrRecFigure,
-   double & sumArea, const size_t numFigure)
+  double & sumArea, const size_t numFigure)
 {
   for (size_t i = 0; i < numFigure; ++i)
     {
-      double area = f[i] -> getArea();
+      double area = f[i]->getArea();
       sumArea += area;
       arrAreaFigure[i] = area;
-      arrRecFigure[i] = f[i] -> getFrameRect();
+      arrRecFigure[i] = f[i]->getFrameRect();
     }
 }
 
@@ -232,7 +237,8 @@ void stupir::printFig(double * arrAreaFigure, rectangle_t * arrRecFigure,
 
 stupir::Rectangle::Rectangle(point_t leftDown, point_t rightUp):
   c_({(rightUp.x + leftDown.x) / 2, (rightUp.y + leftDown.y) / 2}),
-  w_(rightUp.x - leftDown.x), h_(rightUp.y - leftDown.y)
+  w_(rightUp.x - leftDown.x),
+  h_(rightUp.y - leftDown.y)
   {
     if (leftDown.x >= rightUp.x || leftDown.y >= rightUp.y)
     {
@@ -247,7 +253,7 @@ int main()
   stu::Shape ** f = nullptr;
   stu::rectangle_t * arrRecFigure = nullptr;
   double * arrAreaFigure = nullptr;
-  size_t numFigure = 5;
+  const size_t numFigure = 5;
   try
   {
     stu::point_t p = {3.2, 4.5};
@@ -275,9 +281,9 @@ int main()
       throw std::logic_error("\nNot correct coefficient for scale(negative)");
     }
 
-    f[2] -> move({2, -6});
-    f[0] -> scale(4.5);
-    f[1] -> move(2.3, 3.7);
+    f[2]->move({2, -6});
+    f[0]->scale(4.5);
+    f[1]->move(2.3, 3.7);
     stu::scalePoint(scalePoint, k, *f[3]);
     stu::scalePoint(scalePoint, k, *f[1]);
     stu::scalePoint(scalePoint, k, *f[4]);
