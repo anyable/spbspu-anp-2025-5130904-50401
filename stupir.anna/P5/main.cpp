@@ -34,7 +34,7 @@ struct stupir::Shape
   virtual double getArea() const = 0;
   virtual rectangle_t getFrameRect() const = 0;
   virtual void move(point_t) = 0;
-  virtual void move(double , double) = 0;
+  virtual void move(double, double) = 0;
   virtual void scale(double) = 0;
 };
 
@@ -77,7 +77,7 @@ stupir::Rectangle::Rectangle(point_t center, double weight, double hight):
   {
     if (w_ <= 0 || h_ <= 0)
     {
-      throw std::logic_error("Not  correct size");
+      throw std::logic_error("Not  correct size for Rectangle");
     }
   }
 
@@ -91,19 +91,60 @@ stupir::rectangle_t stupir::Rectangle::getFrameRect() const
   return {w_, h_, c_};
 }
 
-struct stupir::Square: Rectangle
-{
-  Square(point_t, double);
-};
-
-stupir::Square::Square(point_t center, double len):
-  Rectangle(center, len, len)
+stupir::Rectangle::Rectangle(point_t leftDown, point_t rightUp):
+  c_({(rightUp.x + leftDown.x) / 2, (rightUp.y + leftDown.y) / 2}),
+  w_(rightUp.x - leftDown.x),
+  h_(rightUp.y - leftDown.y)
   {
-    if (len <= 0)
+    if (leftDown.x >= rightUp.x || leftDown.y >= rightUp.y)
     {
-      throw std::logic_error("Not correct size Square");
+      throw std::logic_error("Not correct points for Rectangle");
     }
   }
+
+struct stupir::Square: Shape
+{
+  Square(point_t, double);
+  double getArea() const override;
+  rectangle_t getFrameRect() const override;
+  void move(point_t) override;
+  void move(double, double) override;
+  void scale(double) override;
+  private:
+    point_t cent_;
+    double size_;
+};
+
+stupir::Square::Square(point_t cent, double size):
+  cent_(cent),
+  size_(size)
+  {}
+
+double stupir::Square::getArea() const
+{
+  return size_ * size_;
+}
+
+stupir::rectangle_t stupir::Square::getFrameRect() const
+{
+  return {size_, size_, cent_};
+}
+
+void stupir::Square::move(point_t p)
+{
+  cent_ = p;
+}
+
+void stupir::Square::move(double x, double y)
+{
+  cent_.x += x;
+  cent_.y += y;
+}
+
+void stupir::Square::scale(double k)
+{
+  size_ *= k;
+}
 
 struct stupir::Xquare: Shape
 {
@@ -113,7 +154,7 @@ struct stupir::Xquare: Shape
   rectangle_t getFrameRect() const override;
   void move(point_t) override;
   void move(double x, double y) override;
-  void scale(double) override;
+  void scale(double k) override;
   double side() const;
   private:
     point_t center_;
@@ -235,16 +276,7 @@ void stupir::printFig(double * arrAreaFigure, rectangle_t * arrRecFigure,
     std::cout << getFrameAll(arrRecFigure, numFigure) << '\n';
 }
 
-stupir::Rectangle::Rectangle(point_t leftDown, point_t rightUp):
-  c_({(rightUp.x + leftDown.x) / 2, (rightUp.y + leftDown.y) / 2}),
-  w_(rightUp.x - leftDown.x),
-  h_(rightUp.y - leftDown.y)
-  {
-    if (leftDown.x >= rightUp.x || leftDown.y >= rightUp.y)
-    {
-      throw std::logic_error("Not correct point for Rectangle");
-    }
-  }
+
 
 int main()
 {
@@ -278,7 +310,7 @@ int main()
     }
     else if (k <= 0)
     {
-      throw std::logic_error("\nNot correct coefficient for scale(negative)");
+      throw std::logic_error("\nNot correct coefficient for scale(negative or null)");
     }
 
     f[2]->move({2, -6});
@@ -288,11 +320,7 @@ int main()
     stu::scalePoint(scalePoint, k, *f[1]);
     stu::scalePoint(scalePoint, k, *f[4]);
 
-    delete [] arrAreaFigure;
-    delete [] arrRecFigure;
     sumArea = 0;
-    arrAreaFigure = new double[numFigure];
-    arrRecFigure = new stu::rectangle_t[numFigure];
     std::cout << "\nAfter scale\n";
     stu::calcParamFig(f, arrAreaFigure, arrRecFigure, sumArea, numFigure);
     stu::printFig(arrAreaFigure, arrRecFigure, sumArea, numFigure);
